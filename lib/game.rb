@@ -24,11 +24,7 @@ class Game
   end
 
   def won?
-    WIN_COMBINATIONS.detect do |combo|
-      board.position(combo[0]+1) == board.position(combo[1]+1) &&
-      board.position(combo[0]+1) == board.position(combo[2]+1) &&
-      board.taken?(combo[0]+1)
-    end
+    board.won?
   end
 
   def draw?
@@ -40,6 +36,10 @@ class Game
   end
 
   def winner
+    winner_player.token if won?
+  end
+
+  def winner_player
     w = won?
     if w
       token = board.position(w[0]+1)
@@ -65,7 +65,7 @@ class Game
     end
 
     if won?
-      puts "Congratulations #{winner.token}!"
+      puts "Congratulations #{winner}!"
       if human_against_cpu?
         puts "You #{winner_is_human? ? "won" : "lose"}!"
       end
@@ -76,7 +76,11 @@ class Game
   def self.start
     puts "Welcome to Tic Tac Toe!"
     game = self.create_game
-    game.play
+    if game.both_are_cpu?
+      game.cpu_plays
+    else
+      game.play
+    end
   end
 
   def self.create_game
@@ -100,12 +104,36 @@ class Game
     end
   end
 
+  def cpu_plays
+    results = Hash.new(0)
+    20.times do
+      play
+      results[:draw] += 1 if draw?
+      if won?
+        results[winner] += 1
+      end
+      board.reset!
+      switch_players
+    end
+    puts results
+  end
+
+  def switch_players
+    temp = @player_1
+    @player_1 = @player_2
+    @player_2 = temp
+  end
+
   def winner_is_human?
-    winner.class == Players::Human
+    winner_player.class == Players::Human
   end
 
   def human_against_cpu?
     player_1.class != player_2.class
+  end
+
+  def both_are_cpu?
+    player_1.class == player_2.class && player_2.class == Players::Computer
   end
 
 end

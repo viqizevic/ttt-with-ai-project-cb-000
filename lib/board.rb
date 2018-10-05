@@ -44,4 +44,18 @@ class Board
     end
   end
 
+  def won?
+    Game::WIN_COMBINATIONS.detect do |combo|
+      position("#{combo[0]+1}") == position("#{combo[1]+1}") &&
+      position("#{combo[0]+1}") == position("#{combo[2]+1}") &&
+      taken?("#{combo[0]+1}")
+    end
+  end
+
+  def self.clone(instance)
+    self.new.tap do |cloned|
+      cloned.cells = instance.cells.map { |c| c }
+    end
+  end
+
 end
