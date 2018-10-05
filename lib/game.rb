@@ -41,15 +41,21 @@ class Game
 
   def winner
     w = won?
-    board.position(w[0]+1) if w
+    if w
+      token = board.position(w[0]+1)
+      return player_1 if token == player_1.token
+      return player_2 if token == player_2.token
+    end
   end
 
   def turn
+    puts "Please enter 1-9:"
     pos = current_player.move(board)
     if !board.valid_move?(pos)
       turn
     else
       board.update(pos, current_player)
+      board.display
     end
   end
 
@@ -58,8 +64,48 @@ class Game
       turn
     end
 
-    puts "Congratulations #{winner}!" if won?
+    if won?
+      puts "Congratulations #{winner.token}!"
+      if human_against_cpu?
+        puts "You #{winner_is_human? ? "won" : "lose"}!"
+      end
+    end
     puts "Cat's Game!" if draw?
+  end
+
+  def self.start
+    puts "Welcome to Tic Tac Toe!"
+    game = self.create_game
+    game.play
+  end
+
+  def self.create_game
+    puts "Enter number of players (0, 1 or 2):"
+    input = gets.strip
+    if input.match(/^[0-2]$/)
+      case input
+      when "2"
+        return Game.new
+      when "1"
+        if 0 == Random.new.rand(2)
+          return Game.new(Players::Computer.new("X"))
+        else
+          return Game.new(Players::Human.new("X"), Players::Computer.new("O"))
+        end
+      when "0"
+        return Game.new(Players::Computer.new("X"), Players::Computer.new("O"))
+      end
+    else
+      self.create_game
+    end
+  end
+
+  def winner_is_human?
+    winner.class == Players::Human
+  end
+
+  def human_against_cpu?
+    player_1.class != player_2.class
   end
 
 end
