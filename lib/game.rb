@@ -49,7 +49,6 @@ class Game
   end
 
   def turn
-    puts "Please enter 1-9:"
     pos = current_player.move(board)
     if !board.valid_move?(pos)
       turn
@@ -62,6 +61,7 @@ class Game
   def play
     while !over?
       turn
+      puts ""
     end
 
     if won?
